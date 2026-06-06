@@ -1,0 +1,5 @@
+registro_conexion.txt
+salida_monitor.txt
+nohup.out
+__pycache__/
+*.pyc
