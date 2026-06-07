@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 
 HOST = "8.8.8.8"
-INTERVALO = 2
+INTERVALO = 5
 LOG_FILE = "registro_conexion.txt"
 
 VERDE = "\033[92m"
@@ -21,6 +21,10 @@ def escribir_log(mensaje):
         archivo.write(mensaje + "\n")
 
 
+def formato_hora(fecha):
+    return fecha.strftime("%Y-%m-%d %H:%M:%S")
+
+
 def hay_conexion():
     resultado = subprocess.run(
         ["ping", "-c", "1", "-W", "2", HOST],
@@ -30,7 +34,7 @@ def hay_conexion():
     return resultado.returncode == 0
 
 
-print(CYAN + "Monitoreando conexión a internet..." + RESET)
+print(CYAN + "Monitor de conexión iniciado." + RESET)
 print(CYAN + f"Haciendo ping a {HOST} cada {INTERVALO} segundos." + RESET)
 print(CYAN + "Presioná CTRL + C para detener.\n" + RESET)
 
@@ -46,8 +50,8 @@ try:
                 duracion = hora_vuelta - hora_caida
 
                 mensaje = (
-                    f"[{hora_vuelta.strftime('%Y-%m-%d %H:%M:%S')}] "
-                    f"CONEXIÓN RESTABLECIDA. Tiempo caído: {duracion}"
+                    f"[{formato_hora(hora_vuelta)}] CONEXIÓN RESTABLECIDA. "
+                    f"Tiempo caído: {duracion}"
                 )
 
                 print(VERDE + "\n✅ INTERNET RESTABLECIDO" + RESET)
@@ -57,7 +61,7 @@ try:
                 internet_caido = False
                 hora_caida = None
             else:
-                mensaje = f"[{ahora.strftime('%Y-%m-%d %H:%M:%S')}] Conexión OK"
+                mensaje = f"[{formato_hora(ahora)}] OK - INTERNET CONECTADO"
                 print(VERDE + "✅ " + mensaje + RESET)
 
         else:
@@ -65,20 +69,17 @@ try:
                 internet_caido = True
                 hora_caida = ahora
 
-                mensaje = (
-                    f"[{hora_caida.strftime('%Y-%m-%d %H:%M:%S')}] "
-                    "ALERTA: SE CAYÓ INTERNET"
-                )
+                mensaje = f"[{formato_hora(hora_caida)}] ALERTA: SE CORTÓ INTERNET"
 
-                print(ROJO + "\n🚨🚨🚨 INTERNET CAÍDO 🚨🚨🚨" + RESET)
+                print(ROJO + "\n🚨 INTERNET CORTADO 🚨" + RESET)
                 print(ROJO + mensaje + "\n" + RESET)
                 escribir_log(mensaje)
             else:
-                mensaje = f"[{ahora.strftime('%Y-%m-%d %H:%M:%S')}] Internet sigue caído"
+                mensaje = f"[{formato_hora(ahora)}] INTERNET SIGUE CORTADO"
                 print(ROJO + "❌ " + mensaje + RESET)
 
         time.sleep(INTERVALO)
 
 except KeyboardInterrupt:
-    print(AMARILLO + "\nMonitoreo detenido por el usuario." + RESET)
+    print(AMARILLO + "\nMonitor detenido por el usuario." + RESET)
     escribir_log("========== MONITOREO DETENIDO ==========")
